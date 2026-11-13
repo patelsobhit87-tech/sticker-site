@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 <html lang="en">
 <head>
@@ -22,6 +21,9 @@ body {
 header {
   padding: 24px 18px;
   border-bottom: 1px solid #252525;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
 }
 
 .logo {
@@ -35,6 +37,16 @@ header {
   font-size: 11px;
   margin-top: 5px;
   letter-spacing: 3px;
+}
+
+.admin-btn {
+  background: #191919;
+  color: #aaa;
+  border: 1px solid #333;
+  padding: 8px 12px;
+  border-radius: 6px;
+  font-size: 12px;
+  cursor: pointer;
 }
 
 .hero {
@@ -88,11 +100,59 @@ header {
 
 .empty {
   text-align: center;
-  padding: 45px 15px;
+  padding: 30px 15px;
   border: 1px dashed #333;
   border-radius: 12px;
   color: #888;
   margin-top: 20px;
+}
+
+.sticker-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 15px;
+}
+
+.sticker-card {
+  background: #161616;
+  border: 1px solid #2a2a2a;
+  padding: 12px;
+  border-radius: 10px;
+  text-align: center;
+}
+
+.sticker-card img {
+  width: 100%;
+  height: 110px;
+  object-fit: contain;
+  border-radius: 6px;
+  margin-bottom: 8px;
+}
+
+.sticker-card p {
+  font-size: 14px;
+  color: #fff;
+  margin-bottom: 8px;
+}
+
+.download-btn {
+  display: inline-block;
+  background: #fff;
+  color: #000;
+  text-decoration: none;
+  padding: 6px 12px;
+  border-radius: 5px;
+  font-size: 12px;
+  font-weight: bold;
+}
+
+#adminPanel {
+  display: none;
+  margin: 20px;
+  padding: 15px;
+  background: #1a1212;
+  border: 1px solid #552222;
+  border-radius: 12px;
 }
 
 footer {
@@ -107,21 +167,31 @@ footer {
 <body>
 
 <header>
-  <div class="logo">𝑺 𝑽 𝑻</div>
-  <div class="subtitle">STICKER COLLECTION</div>
+  <div>
+    <div class="logo">S V T</div>
+    <div class="subtitle">STICKER COLLECTION</div>
+  </div>
+  <button class="admin-btn" onclick="openAdmin()">Admin</button>
 </header>
+
+<!-- Admin Panel (Hidden until password entered) -->
+<div id="adminPanel">
+  <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:15px;">
+    <h3 style="color:#ff6b6b;">Admin Approval Panel</h3>
+    <button onclick="document.getElementById('adminPanel').style.display='none'" style="background:#333; color:#fff; border:none; padding:5px 10px; border-radius:4px;">Close</button>
+  </div>
+  <div id="pendingList" class="sticker-grid">Loading pending stickers...</div>
+</div>
 
 <div class="hero">
   <h1>Discover Stickers.</h1>
   <p>Your favourite stickers, all in one place.<br>
   Explore. Collect. Download. For free.</p>
 
-  <input class="search"
-  type="search"
-  placeholder="Search stickers...">
+  <input class="search" id="searchInput" type="search" placeholder="Search stickers..." onkeyup="filterStickers()">
 </div>
 
-< class="section">
+<div class="section">
   <h2>Categories</h2>
   <div class="categories">
     <div class="category">Anime</div>
@@ -131,72 +201,193 @@ footer {
     <div class="category">Aesthetic</div>
     <div class="category">WhatsApp</div>
   </div>
-</div></div>
-    <!-- Upload Section & Script -->
-    <div class="section" style="margin-top: 20px; padding: 15px; background: #151515; border-radius: 12px; border: 1px solid #333;">
-        <h3 style="margin-bottom: 10px; color: #fff; font-size: 18px;">📤 Share Your Sticker</h3>
-        <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Upload your sticker here. It will go live after admin approval.</p>
-        
-        <form id="uploadForm">
-            <input type="text" id="stickerTitle" placeholder="Sticker Name / Category" required style="width: 100%; padding: 10px; margin-bottom: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 6px; font-size: 14px;">
-            <input type="file" id="stickerFile" accept="image/*" required style="margin-bottom: 10px; color: #aaa; font-size: 13px;">
-            <br>
-            <button type="submit" style="background: #fff; color: #000; border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%;">Upload for Approval</button>
-        </form>
-    </div>
+</div>
 
-    <script>
-        document.getElementById('uploadForm').addEventListener('submit', function(e) {
-            e.preventDefault();
-            const title = document.getElementById('stickerTitle').value;
-            const fileInput = document.getElementById('stickerFile');
-            
-            const reader = new FileReader();
-            reader.onload = function(event) {
-                const imageData = event.target.result;
-                let pendingStickers = JSON.parse(localStorage.getItem('pendingStickers')) || [];
-                pendingStickers.push({ title: title, image: imageData });
-                localStorage.setItem('pendingStickers', JSON.stringify(pendingStickers));
-                alert('Sticker uploaded for approval!');
-                document.getElementById('uploadForm').reset();
-            };
-            if(fileInput.files[0]) {
-                reader.readAsDataURL(fileInput.files[0]);
-            }
-        });
-
-        window.addEventListener('DOMContentLoaded', () => {
-            let approvedStickers = JSON.parse(localStorage.getItem('approvedStickers')) || [];
-            const emptySection = document.querySelector('.section .empty');
-            if (approvedStickers.length > 0 && emptySection) {
-                let htmlContent = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">';
-                approvedStickers.forEach(sticker => {
-                    htmlContent += `
-                        <div style="background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center;">
-                            <img src="${sticker.image}" alt="${sticker.title}" style="width: 100%; height: 100px; object-fit: contain; border-radius: 4px;">
-                            <p style="font-size: 14px; margin-top: 5px; color: white;">${sticker.title}</p>
-                        </div>
-                    `;
-                });
-                htmlContent += '</div>';
-                emptySection.innerHTML = htmlContent;
-            }
-        });
-    </script>
+<!-- Upload Section -->
+<div class="section" style="margin: 20px; padding: 15px; background: #151515; border-radius: 12px; border: 1px solid #333;">
+  <h3 style="margin-bottom: 10px; color: #fff; font-size: 18px;">📤 Share Your Sticker</h3>
+  <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Upload your sticker here. It will go live after admin approval.</p>
+  
+  <form id="uploadForm">
+    <input type="text" id="stickerTitle" placeholder="Sticker Name / Category" required style="width: 100%; padding: 10px; margin-bottom: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 6px; font-size: 14px;">
+    <input type="file" id="stickerFile" accept="image/*" required style="margin-bottom: 10px; color: #aaa; font-size: 13px;">
+    <br>
+    <button type="submit" id="uploadBtn" style="background: #fff; color: #000; border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%;">Upload for Approval</button>
+  </form>
+</div>
 
 <div class="section">
   <h2>Latest Stickers</h2>
-  <div class="empty">
-    <p>No stickers yet.</p>
-    <p>New collections coming soon.</p>
+  <div id="stickersContainer" class="empty">
+    <p>Loading stickers...</p>
   </div>
 </div>
 
 <footer>
-  <img src="sticker.png" alt="Sticker" class="my-sticker">
-
   © 2026 SVT Stickers · All Rights Reserved
 </footer>
+
+<!-- Firebase Integration -->
+<script type="module">
+  import { initializeApp } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-app.js";
+  import { getFirestore, collection, addDoc, getDocs, doc, updateDoc, deleteDoc } from "https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore.js";
+
+  const firebaseConfig = {
+    apiKey: "AIzaSyB8g4jF5Bt3HuCZZ99hoze8APb1ECvjntE",
+    authDomain: "sticker-site.firebaseapp.com",
+    projectId: "sticker-site",
+    storageBucket: "sticker-site.firebasestorage.app",
+    messagingSenderId: "1000135402461",
+    appId: "1:1000135402461:web:0f9446d1eb9c1de7454c34",
+    measurementId: "G-51GHJTNW9Q"
+  };
+
+  const app = initializeApp(firebaseConfig);
+  const db = getFirestore(app);
+  let allApprovedStickers = [];
+
+  // 1. Sticker Upload (Compressed for Firestore)
+  document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const title = document.getElementById('stickerTitle').value;
+    const fileInput = document.getElementById('stickerFile');
+    const btn = document.getElementById('uploadBtn');
+
+    if (!fileInput.files[0]) return;
+    btn.innerText = "Uploading...";
+    btn.disabled = true;
+
+    const reader = new FileReader();
+    reader.onload = function(event) {
+      const img = new Image();
+      img.onload = async function() {
+        // Resize image so it fits easily in Firestore database
+        const canvas = document.createElement('canvas');
+        const maxSize = 350;
+        let width = img.width;
+        let height = img.height;
+        if (width > height) {
+          if (width > maxSize) { height *= maxSize / width; width = maxSize; }
+        } else {
+          if (height > maxSize) { width *= maxSize / height; height = maxSize; }
+        }
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+        const compressedDataUrl = canvas.toDataURL('image/webp', 0.8);
+
+        try {
+          await addDoc(collection(db, "stickers"), {
+            name: title,
+            imageUrl: compressedDataUrl,
+            status: "pending",
+            createdAt: Date.now()
+          });
+          alert('Sticker uploaded! Waiting for admin approval.');
+          document.getElementById('uploadForm').reset();
+          loadAdminPending();
+        } catch (err) {
+          alert('Upload failed: ' + err.message);
+        }
+        btn.innerText = "Upload for Approval";
+        btn.disabled = false;
+      };
+      img.src = event.target.result;
+    };
+    reader.readAsDataURL(fileInput.files[0]);
+  });
+
+  // 2. Load Approved Stickers on Website
+  async function loadApprovedStickers() {
+    const container = document.getElementById('stickersContainer');
+    try {
+      const snapshot = await getDocs(collection(db, "stickers"));
+      allApprovedStickers = [];
+      snapshot.forEach((docSnap) => {
+        const data = docSnap.data();
+        if (data.status === "approved" || !data.status) {
+          allApprovedStickers.push({ id: docSnap.id, ...data });
+        }
+      });
+      renderStickers(allApprovedStickers);
+    } catch (err) {
+      container.innerHTML = `<p>Error loading stickers: ${err.message}</p>`;
+    }
+  }
+
+  function renderStickers(list) {
+    const container = document.getElementById('stickersContainer');
+    if (list.length === 0) {
+      container.className = "empty";
+      container.innerHTML = "<p>No stickers yet.</p><p>New collections coming soon.</p>";
+      return;
+    }
+    container.className = "sticker-grid";
+    container.innerHTML = list.map(s => `
+      <div class="sticker-card">
+        <img src="${s.imageUrl}" alt="${s.name}">
+        <p>${s.name}</p>
+        <a href="${s.imageUrl}" download="${s.name}.webp" class="download-btn">Download</a>
+      </div>
+    `).join('');
+  }
+
+  // 3. Search Function
+  window.filterStickers = function() {
+    const q = document.getElementById('searchInput').value.toLowerCase();
+    const filtered = allApprovedStickers.filter(s => (s.name || '').toLowerCase().includes(q));
+    renderStickers(filtered);
+  };
+
+  // 4. Admin Panel Functions
+  window.openAdmin = function() {
+    const pass = prompt("Enter Admin Password:");
+    if (pass === "1234") {
+      document.getElementById('adminPanel').style.display = 'block';
+      loadAdminPending();
+    } else if (pass !== null) {
+      alert("Wrong password!");
+    }
+  };
+
+  async function loadAdminPending() {
+    const pendingList = document.getElementById('pendingList');
+    pendingList.innerHTML = "Loading...";
+    const snapshot = await getDocs(collection(db, "stickers"));
+    let html = "";
+    snapshot.forEach((docSnap) => {
+      const data = docSnap.data();
+      if (data.status === "pending") {
+        html += `
+          <div class="sticker-card">
+            <img src="${data.imageUrl}" alt="${data.name}">
+            <p>${data.name}</p>
+            <button onclick="approveSticker('${docSnap.id}')" style="background:#28a745; color:white; border:none; padding:6px 10px; border-radius:4px; margin-right:5px;">Approve</button>
+            <button onclick="deleteSticker('${docSnap.id}')" style="background:#dc3545; color:white; border:none; padding:6px 10px; border-radius:4px;">Delete</button>
+          </div>
+        `;
+      }
+    });
+    pendingList.innerHTML = html || "<p style='color:#aaa; grid-column:span 2;'>No pending stickers.</p>";
+  }
+
+  window.approveSticker = async function(id) {
+    await updateDoc(doc(db, "stickers", id), { status: "approved" });
+    alert("Sticker Approved & Live!");
+    loadAdminPending();
+    loadApprovedStickers();
+  };
+
+  window.deleteSticker = async function(id) {
+    if (confirm("Delete this sticker?")) {
+      await deleteDoc(doc(db, "stickers", id));
+      loadAdminPending();
+    }
+  };
+
+  loadApprovedStickers();
+</script>
 
 </body>
 </html>
