@@ -1,0 +1,202 @@
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>SVT Stickers</title>
+
+<style>
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  background: #080808;
+  color: white;
+  font-family: Arial, sans-serif;
+}
+
+header {
+  padding: 24px 18px;
+  border-bottom: 1px solid #252525;
+}
+
+.logo {
+  font-size: 32px;
+  letter-spacing: 8px;
+  font-weight: bold;
+}
+
+.subtitle {
+  color: #888;
+  font-size: 11px;
+  margin-top: 5px;
+  letter-spacing: 3px;
+}
+
+.hero {
+  padding: 45px 20px 30px;
+}
+
+.hero h1 {
+  font-size: 34px;
+  margin-bottom: 12px;
+}
+
+.hero p {
+  color: #999;
+  line-height: 1.6;
+}
+
+.search {
+  margin-top: 25px;
+  width: 100%;
+  padding: 15px;
+  border: 1px solid #333;
+  background: #141414;
+  color: white;
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.section {
+  padding: 20px;
+}
+
+.section h2 {
+  margin-bottom: 18px;
+  font-size: 20px;
+}
+
+.categories {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.category {
+  background: #191919;
+  border: 1px solid #333;
+  padding: 11px 17px;
+  border-radius: 20px;
+  color: #ddd;
+  font-size: 13px;
+}
+
+.empty {
+  text-align: center;
+  padding: 45px 15px;
+  border: 1px dashed #333;
+  border-radius: 12px;
+  color: #888;
+  margin-top: 20px;
+}
+
+footer {
+  text-align: center;
+  color: #666;
+  padding: 35px 15px;
+  font-size: 12px;
+}
+</style>
+</head>
+
+<body>
+
+<header>
+  <div class="logo">𝑺 𝑽 𝑻</div>
+  <div class="subtitle">STICKER COLLECTION</div>
+</header>
+
+<div class="hero">
+  <h1>Discover Stickers.</h1>
+  <p>Your favourite stickers, all in one place.<br>
+  Explore. Collect. Download. For free.</p>
+
+  <input class="search"
+  type="search"
+  placeholder="Search stickers...">
+</div>
+
+< class="section">
+  <h2>Categories</h2>
+  <div class="categories">
+    <div class="category">Anime</div>
+    <div class="category">Memes</div>
+    <div class="category">Funny</div>
+    <div class="category">Cute</div>
+    <div class="category">Aesthetic</div>
+    <div class="category">WhatsApp</div>
+  </div>
+</div></div>
+    <!-- Upload Section & Script -->
+    <div class="section" style="margin-top: 20px; padding: 15px; background: #151515; border-radius: 12px; border: 1px solid #333;">
+        <h3 style="margin-bottom: 10px; color: #fff; font-size: 18px;">📤 Share Your Sticker</h3>
+        <p style="font-size: 13px; color: #aaa; margin-bottom: 12px;">Upload your sticker here. It will go live after admin approval.</p>
+        
+        <form id="uploadForm">
+            <input type="text" id="stickerTitle" placeholder="Sticker Name / Category" required style="width: 100%; padding: 10px; margin-bottom: 10px; background: #222; color: white; border: 1px solid #444; border-radius: 6px; font-size: 14px;">
+            <input type="file" id="stickerFile" accept="image/*" required style="margin-bottom: 10px; color: #aaa; font-size: 13px;">
+            <br>
+            <button type="submit" style="background: #fff; color: #000; border: none; padding: 10px 15px; font-weight: bold; border-radius: 6px; cursor: pointer; width: 100%;">Upload for Approval</button>
+        </form>
+    </div>
+
+    <script>
+        document.getElementById('uploadForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            const title = document.getElementById('stickerTitle').value;
+            const fileInput = document.getElementById('stickerFile');
+            
+            const reader = new FileReader();
+            reader.onload = function(event) {
+                const imageData = event.target.result;
+                let pendingStickers = JSON.parse(localStorage.getItem('pendingStickers')) || [];
+                pendingStickers.push({ title: title, image: imageData });
+                localStorage.setItem('pendingStickers', JSON.stringify(pendingStickers));
+                alert('Sticker uploaded for approval!');
+                document.getElementById('uploadForm').reset();
+            };
+            if(fileInput.files[0]) {
+                reader.readAsDataURL(fileInput.files[0]);
+            }
+        });
+
+        window.addEventListener('DOMContentLoaded', () => {
+            let approvedStickers = JSON.parse(localStorage.getItem('approvedStickers')) || [];
+            const emptySection = document.querySelector('.section .empty');
+            if (approvedStickers.length > 0 && emptySection) {
+                let htmlContent = '<div style="display: grid; grid-template-columns: repeat(2, 1fr); gap: 15px;">';
+                approvedStickers.forEach(sticker => {
+                    htmlContent += `
+                        <div style="background: #1a1a1a; padding: 10px; border-radius: 8px; text-align: center;">
+                            <img src="${sticker.image}" alt="${sticker.title}" style="width: 100%; height: 100px; object-fit: contain; border-radius: 4px;">
+                            <p style="font-size: 14px; margin-top: 5px; color: white;">${sticker.title}</p>
+                        </div>
+                    `;
+                });
+                htmlContent += '</div>';
+                emptySection.innerHTML = htmlContent;
+            }
+        });
+    </script>
+
+<div class="section">
+  <h2>Latest Stickers</h2>
+  <div class="empty">
+    <p>No stickers yet.</p>
+    <p>New collections coming soon.</p>
+  </div>
+</div>
+
+<footer>
+  <img src="sticker.png" alt="Sticker" class="my-sticker">
+
+  © 2026 SVT Stickers · All Rights Reserved
+</footer>
+
+</body>
+</html>
