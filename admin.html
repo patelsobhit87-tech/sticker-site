@@ -1,0 +1,59 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SVT Stickers - Admin Panel</title>
+    <style>
+        body { background: #080808; color: white; font-family: Arial, sans-serif; padding: 20px; }
+        .admin-card { background: #1a1a1a; padding: 15px; margin-bottom: 15px; border-radius: 8px; display: flex; align-items: center; justify-content: space-space-between; justify-content: space-between; }
+        .admin-card img { width: 60px; height: 60px; object-fit: contain; border-radius: 4px; }
+        button { background: #4CAF50; color: white; border: none; padding: 8px 15px; border-radius: 4px; cursor: pointer; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <h1>Admin Approval Panel</h1>
+    <p>Pending Stickers for Review:</p>
+    
+    <div id="pendingContainer"></div>
+
+    <script>
+        let pendingStickers = JSON.parse(localStorage.getItem('pendingStickers')) || [];
+        let approvedStickers = JSON.parse(localStorage.getItem('approvedStickers')) || [];
+        
+        const container = document.getElementById('pendingContainer');
+
+        function renderPending() {
+            if (pendingStickers.length === 0) {
+                container.innerHTML = '<p style="color: #888;">No pending stickers to approve.</p>';
+                return;
+            }
+            
+            container.innerHTML = '';
+            pendingStickers.forEach((sticker, index) => {
+                container.innerHTML += `
+                    <div class="admin-card">
+                        <img src="${sticker.image}" alt="Sticker">
+                        <span>${sticker.title}</span>
+                        <button onclick="approve_sticker(${index})">Approve</button>
+                    </div>
+                `;
+            });
+        }
+
+        function approve_sticker(index) {
+            let approvedItem = pendingStickers.splice(index, 1)[0];
+            approvedStickers.push(approvedItem);
+            
+            localStorage.setItem('pendingStickers', JSON.stringify(pendingStickers));
+            localStorage.setItem('approvedStickers', JSON.stringify(approvedStickers));
+            
+            alert('Sticker Approved & Live on Website!');
+            renderPending();
+        }
+
+        renderPending();
+    </script>
+</body>
+</html>
